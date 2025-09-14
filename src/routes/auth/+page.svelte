@@ -10,27 +10,11 @@
   const mockUsers = {
     student: {
       google_id: "123456789",
-      email: "john.doe@mail.kmitl.ac.th",
+      email: "john.doe@kmitl.ac.th",
       name: "John Doe",
       avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
       role: "student",
       student_id: "66050123"
-    },
-    admin: {
-      google_id: "987654321", 
-      email: "admin@kmitl.ac.th",
-      name: "Admin User",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-      role: "admin",
-      student_id: null
-    },
-    staff: {
-      google_id: "555666777",
-      email: "staff@kmitl.ac.th", 
-      name: "Staff Member",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b332db77?w=100&h=100&fit=crop&crop=face",
-      role: "staff",
-      student_id: null
     }
   };
   
@@ -73,18 +57,6 @@
       <div class="text-6xl mb-4">🍽️</div>
       <h1 class="text-3xl font-bold text-base-content mb-2">QuickSciSeat</h1>
       <p class="text-base-content/70 mb-6">ระบบจองโต๊ะอาหาร คณะวิทยาศาสตร์</p>
-      
-      <!-- User Selection (Mock Only) -->
-      <div class="form-control mb-6">
-        <label class="label" for="user-role-select">
-          <span class="label-text">เลือกบทบาทสำหรับทดสอบ:</span>
-        </label>
-        <select id="user-role-select" class="select select-bordered w-full" bind:value={selectedUser}>
-          <option value="student">นักศึกษา - John Doe</option>
-          <option value="admin">ผู้ดูแลระบบ - Admin User</option>
-          <option value="staff">เจ้าหน้าที่ - Staff Member</option>
-        </select>
-      </div>
       
       <!-- Selected User Preview -->
       <div class="card bg-base-200 mb-6">

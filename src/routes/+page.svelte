@@ -2,6 +2,7 @@
     import '../app.css'
     import { Home, Calendar, User, LogOut, Sun, Moon, Users, X, Clock, Mail, Phone, CheckCircle, LogIn, ArrowLeft, GraduationCap } from 'lucide-svelte';
     import { onMount } from 'svelte';
+    import { goto } from '$app/navigation';
     import { tables, timeSlots, tableStatuses, getTableStatus, type Table, type TableStatus } from '$lib/data/mockData';
     import ReservationModal from '$lib/components/ReservationModal.svelte';
     import StudentIDModal from '$lib/components/StudentIDModal.svelte';
@@ -14,6 +15,22 @@
     import TableButton from '$lib/components/TableButton.svelte';
 
     let selectedTimeSlot = 'slot-8';
+    
+    // User session state
+    let userSession: {
+        user: {
+            google_id: string;
+            email: string;
+            name: string;
+            avatar: string;
+            role: string;
+            student_id?: string;
+        };
+        expires_at: string;
+        session_id: string;
+    } | null = null;
+    
+    let sessionExpired = false;
     
     // Modal states - ประกาศครบทุกตัว
     let showReservationModal = false;
@@ -29,9 +46,53 @@
         studentIds: [] as string[]
     };
 
+    // Check user session on mount
+    onMount(() => {
+        checkUserSession();
+    });
+
+    function checkUserSession() {
+        try {
+            const sessionData = localStorage.getItem('user_session');
+            if (sessionData) {
+                const session = JSON.parse(sessionData);
+                
+                // Check if session is expired
+                const now = new Date();
+                const expiresAt = new Date(session.expires_at);
+                
+                if (now > expiresAt) {
+                    // Session expired
+                    localStorage.removeItem('user_session');
+                    sessionExpired = true;
+                    setTimeout(() => {
+                        goto('/auth');
+                    }, 3000);
+                } else {
+                    // Valid session
+                    userSession = session;
+                    // Pre-fill userName with logged-in user's name
+                    reservationData.userName = session.user.name;
+                }
+            } else {
+                // No session found, redirect to auth
+                goto('/auth');
+            }
+        } catch (error) {
+            console.error('Error checking session:', error);
+            goto('/auth');
+        }
+    }
+
+    function handleLogout() {
+        localStorage.removeItem('user_session');
+        userSession = null;
+        goto('/auth');
+    }
+
     function resetReservationData() {
         reservationData = {
-            userName: '',
+            userName: userSession?.user.name || '',
             partySize: 2,
             studentIds: []
         };
@@ -120,6 +181,23 @@
             default: return '❓';
         }
     }
+
+    function formatTimeRemaining(expiresAt: string): string {
+        const now = new Date();
+        const expires = new Date(expiresAt);
+        const diff = expires.getTime() - now.getTime();
+        
+        if (diff <= 0) return 'หมดอายุแล้ว';
+        
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        if (hours > 0) {
+            return `อีก ${hours} ชั่วโมง ${minutes} นาที`;
+        } else {
+            return `อีก ${minutes} นาที`;
+        }
+    }
   
     $: stats = (() => {
         let available = 0, reserved = 0, occupied = 0;
@@ -131,13 +209,36 @@
         });
         return { available, reserved, occupied };
     })();
-  
-
 </script>
 
 <svelte:head>
     <title>หน้าแรก - QuickSciSeat</title>
 </svelte:head>
+
+<!-- Session Expired Alert -->
+{#if sessionExpired}
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-base-100 rounded-lg p-6 max-w-md mx-4">
+        <div class="text-center">
+            <div class="text-6xl mb-4">⏰</div>
+            <h3 class="text-lg font-bold mb-2">เซสชันหมดอายุ</h3>
+            <p class="text-base-content/70 mb-4">กรุณาเข้าสู่ระบบใหม่เพื่อใช้งานต่อ</p>
+            <div class="loading loading-spinner loading-md"></div>
+            <p class="text-sm mt-2">กำลังนำไปหน้าเข้าสู่ระบบ...</p>
+        </div>
+    </div>
+</div>
+{/if}
+
+<!-- Loading state while checking session -->
+{#if !userSession && !sessionExpired}
+<div class="min-h-screen flex items-center justify-center bg-base-200">
+    <div class="text-center">
+        <div class="loading loading-spinner loading-lg mb-4"></div>
+        <p>กำลังตรวจสอบสิทธิ์การเข้าใช้งาน...</p>
+    </div>
+</div>
+{:else if userSession}
 
 <NavBar />
 
@@ -145,11 +246,58 @@
 <div class="min-h-screen bg-base-200">
     <div class="container mx-auto px-4 py-8 max-w-7xl">
         
+        <!-- User Info Card -->
+        <div class="card bg-base-100 shadow-lg mb-6">
+            <div class="card-body p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="avatar">
+                            <div class="w-16 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                                <img src={userSession.user.avatar} alt="User avatar" />
+                            </div>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-base-content">สวัสดี {userSession.user.name} 👋</h2>
+                            <div class="flex flex-wrap gap-2 mt-1">
+                                <div class="badge badge-primary">
+                                    <Mail class="w-3 h-3 mr-1" />
+                                    {userSession.user.email}
+                                </div>
+                                {#if userSession.user.student_id}
+                                <div class="badge badge-secondary">
+                                    <GraduationCap class="w-3 h-3 mr-1" />
+                                    รหัสนักศึกษา: {userSession.user.student_id}
+                                </div>
+                                {/if}
+                                <div class="badge badge-accent">
+                                    <User class="w-3 h-3 mr-1" />
+                                    {userSession.user.role}
+                                </div>
+                            </div>
+                            <div class="text-sm text-base-content/70 mt-2">
+                                <Clock class="w-4 h-4 inline mr-1" />
+                                เซสชันหมดอายุ: {formatTimeRemaining(userSession.expires_at)}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button 
+                            class="btn btn-outline btn-sm"
+                            on:click={handleLogout}
+                        >
+                            <LogOut class="w-4 h-4" />
+                            ออกจากระบบ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Header -->
         <Header />
         
         <!-- Stats -->
-         <Stats {stats} {tables} />
+        <Stats {stats} {tables} />
         
         <!-- Time Selector -->
         <TimeSelector {timeSlots} bind:selectedTimeSlot />
@@ -185,6 +333,8 @@
         {/each}
     </div>
 </div>
+
+{/if}
 
 <!-- Reservation Modal -->
 {#if showReservationModal && selectedTable}
