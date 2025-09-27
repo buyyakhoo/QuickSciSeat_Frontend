@@ -1,6 +1,17 @@
 <script lang="ts">
     import { Home, Calendar, Moon, Sun, User, LogOut } from "lucide-svelte";
+    import { SignOut } from "@auth/sveltekit/components";
     import { onMount } from "svelte";
+
+    export let session: { 
+        user?: { 
+            name?: string; 
+            email?: string; 
+            image?: string; 
+            student_id?: string; 
+            role?: string 
+        } 
+    } | null = null;
 
     let currentTheme = 'light';
     
@@ -36,27 +47,40 @@
             {#if currentTheme === 'light'}<Moon class="w-5 h-5" />{:else}<Sun class="w-5 h-5" />{/if}
         </button>
         
-        <div class="dropdown dropdown-end">
-            <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-                <div class="w-10 rounded-full">
-                    <img alt="Profile" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" />
+        {#if session?.user}
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                    <div class="w-10 rounded-full">
+                        <img alt="Profile" src={session.user?.image || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face"} />
+                    </div>
                 </div>
+                <ul class="mt-3 z-50 p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+                    <li class="menu-title">
+                        <span class="text-base-content">{session.user?.name || 'ผู้ใช้'}</span>
+                        <span class="text-xs opacity-60">{session.user?.role || 'นักศึกษา'}</span>
+                    </li>
+                    <li><a href="/" class="text-base-content"><User class="w-4 h-4" />โปรไฟล์</a></li>
+                    <li><hr class="my-1"></li>
+                    <li>
+                        <button on:click={toggleTheme} class="text-base-content">
+                            {#if currentTheme === 'light'}<Moon class="w-4 h-4" />โหมดมืด{:else}<Sun class="w-4 h-4" />โหมดสว่าง{/if}
+                        </button>
+                    </li>
+                    <li><hr class="my-1"></li>
+                    <li>
+                        <SignOut redirectTo="/auth">
+                            <div slot="submitButton" class="text-error w-full text-left">
+                                <LogOut class="w-4 h-4 inline mr-2" />ออกจากระบบ
+                            </div>
+                        </SignOut>
+                    </li>
+                </ul>
             </div>
-            <ul class="mt-3 z-50 p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-                <li class="menu-title">
-                    <span class="text-base-content">John Doe</span>
-                    <span class="text-xs opacity-60">นักศึกษา</span>
-                </li>
-                <li><a href="/" class="text-base-content"><User class="w-4 h-4" />โปรไฟล์</a></li>
-                <li><hr class="my-1"></li>
-                <li>
-                    <button on:click={toggleTheme} class="text-base-content">
-                        {#if currentTheme === 'light'}<Moon class="w-4 h-4" />โหมดมืด{:else}<Sun class="w-4 h-4" />โหมดสว่าง{/if}
-                    </button>
-                </li>
-                <li><hr class="my-1"></li>
-                <li><a href="/auth" class="text-error"><LogOut class="w-4 h-4" />ออกจากระบบ</a></li>
-            </ul>
-        </div>
+        {:else}
+            <a href="/auth" class="btn btn-ghost btn-sm">
+                <LogOut class="w-4 h-4" />
+                เข้าสู่ระบบ
+            </a>
+        {/if}
     </div>
 </div>

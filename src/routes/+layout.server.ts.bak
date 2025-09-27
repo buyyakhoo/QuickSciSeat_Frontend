@@ -1,9 +1,0 @@
-import type { ServerLoadEvent } from '@sveltejs/kit';
- 
-export const load = async (event: ServerLoadEvent) => {
-    // ชั่วคราว return session เป็น null เพื่อให้เว็บรันได้
-    // เมื่อติดตั้ง Auth.js แล้วค่อยเปลี่ยนเป็น await event.locals.auth()
-    return {
-        session: null
-    };
-};

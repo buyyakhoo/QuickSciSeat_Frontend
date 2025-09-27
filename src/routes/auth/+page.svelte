@@ -1,49 +1,26 @@
+<!-- src/routes/auth/+page.svelte -->
 <script lang="ts">
   import '../../app.css';
+  import { SignIn } from "@auth/sveltekit/components";
+  import { page } from "$app/stores";
   import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
   import { LogIn } from 'lucide-svelte';
   
-  let isLoading = false;
-  let selectedUser: keyof typeof mockUsers = 'student'; // Default selection
+  let errorMessage = '';
   
-  // Mock user data
-  const mockUsers = {
-    student: {
-      google_id: "123456789",
-      email: "john.doe@kmitl.ac.th",
-      name: "John Doe",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-      role: "student",
-      student_id: "66050123"
+  // ตรวจสอบ session เมื่อโหลดหน้า
+  onMount(() => {
+    if ($page.data.session) {
+      goto('/'); // redirect ถ้ามี session แล้ว
     }
-  };
-  
-  async function handleGoogleSignIn() {
-    isLoading = true;
     
-    try {
-      // จำลอง Google OAuth flow
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const userData = mockUsers[selectedUser];
-      
-      // จำลองการบันทึก session
-      localStorage.setItem('user_session', JSON.stringify({
-        user: userData,
-        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
-        session_id: Math.random().toString(36).substring(7)
-      }));
-      
-      // Redirect ไปหน้าหลัก
-      goto('/');
-      
-    } catch (error) {
-      console.error('Login failed:', error);
-      alert('เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่');
-    } finally {
-      isLoading = false;
+    // ตรวจสอบ error จาก URL parameters
+    const error = $page.url.searchParams.get('error');
+    if (error === 'AccessDenied') {
+      errorMessage = 'กรุณาใช้ email @kmitl.ac.th หรือ @gmail.com เท่านั้น';
     }
-  }
+  });
 </script>
 
 <svelte:head>
@@ -58,42 +35,37 @@
       <h1 class="text-3xl font-bold text-base-content mb-2">QuickSciSeat</h1>
       <p class="text-base-content/70 mb-6">ระบบจองโต๊ะอาหาร คณะวิทยาศาสตร์</p>
       
-      <!-- Selected User Preview -->
-      <div class="card bg-base-200 mb-6">
-        <div class="card-body p-4">
-          <div class="flex items-center gap-3">
-            <div class="avatar">
-              <div class="w-12 rounded-full">
-                <img src={mockUsers[selectedUser].avatar} alt="avatar" />
-              </div>
-            </div>
-            <div class="text-left">
-              <div class="font-bold">{mockUsers[selectedUser].name}</div>
-              <div class="text-sm opacity-70">{mockUsers[selectedUser].email}</div>
-              <div class="badge badge-sm badge-primary">{mockUsers[selectedUser].role}</div>
-            </div>
-          </div>
+      <!-- Error Message -->
+      {#if errorMessage}
+        <div class="alert alert-error mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{errorMessage}</span>
         </div>
-      </div>
+      {/if}
       
-      <!-- Google OAuth Button (Mock) -->
-      <button
-        class="btn btn-primary btn-lg w-full shadow-lg"
-        disabled={isLoading}
-        on:click={handleGoogleSignIn}
-      >
-        {#if isLoading}
-          <span class="loading loading-spinner loading-md"></span>
-          กำลังเข้าสู่ระบบ...
-        {:else}
-          <LogIn class="w-6 h-6" />
-          เข้าสู่ระบบด้วย Google (Mock)
-        {/if}
-      </button>
+      <!-- Check if already signed in -->
+      {#if $page.data.session}
+        <div class="alert alert-success mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>เข้าสู่ระบบแล้ว กำลังนำไปหน้าหลัก...</span>
+        </div>
+      {:else}
+        <!-- Google OAuth Button -->
+        <SignIn provider="google">
+          <div slot="submitButton" class="btn btn-primary btn-lg w-full shadow-lg">
+            <LogIn class="w-6 h-6" />
+            เข้าสู่ระบบด้วย Google
+          </div>
+        </SignIn>
+      {/if}
       
       <div class="text-xs text-base-content/50 mt-6">
         <p>© 2024 Science Faculty, KMITL</p>
-        <p class="mt-2 text-warning">โหมดทดสอบ - ไม่เชื่อมต่อ Google จริง</p>
+        <p class="mt-2 text-info">กรุณาใช้ email @kmitl.ac.th</p>
       </div>
     </div>
   </div>
