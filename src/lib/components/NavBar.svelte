@@ -3,14 +3,10 @@
     import { SignOut } from "@auth/sveltekit/components";
     import { onMount } from "svelte";
 
+    import type { User as UserData } from '$lib/shared/types';
+
     export let session: { 
-        user?: { 
-            name?: string; 
-            email?: string; 
-            image?: string; 
-            student_id?: string; 
-            role?: string 
-        } 
+        user?: UserData
     } | null = null;
 
     let currentTheme = 'light';

@@ -3,28 +3,17 @@
     import { createEventDispatcher } from 'svelte';
     import { timeSlots } from '$lib/data/mockData';
 
+    import type { Table, TableStatus, GetStatusTextFn, GetStatusIconFn, DetailModalEvents } from '$lib/shared/types';
+
     // Props
-    export let selectedTable: {
-        id: number;
-        capacity: number;
-        minCapacity: number;
-    };
+    export let selectedTable: Table;
     export let selectedTimeSlot: string;
-    export let selectedTableStatus: {
-        status: string;
-        userName?: string;
-        partySize?: number;
-    };
-    export let getStatusText: (status: string) => string;
-    export let getStatusIcon: (status: string) => string;
+    export let selectedTableStatus: TableStatus;
+    export let getStatusText: GetStatusTextFn;
+    export let getStatusIcon: GetStatusIconFn;
 
     // Event dispatcher
-    const dispatch = createEventDispatcher<{
-        close: void;
-        reserve: void;
-        checkin: void;
-        checkout: void;
-    }>();
+    const dispatch = createEventDispatcher<DetailModalEvents>();
 
     function handleClose() {
         dispatch('close');

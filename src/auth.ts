@@ -16,7 +16,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth(async (event) => {
         debug: true,
         callbacks: {
             async signIn({ user, account, profile }: { user: User, account?: any, profile?: any }) {
-                // ตรวจสอบว่าเป็น email KMITL หรือไม่
+
                 if (user.email?.endsWith('@kmitl.ac.th')) {
                     return true;
                 }

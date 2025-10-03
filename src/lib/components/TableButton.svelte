@@ -1,25 +1,20 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte';
 
+    import type { Table, TableStatus, GetTableStatusFn, GetStatusColorFn, GetStatusIconFn, GetStatusTextFn, TableButtonEvents } from '$lib/shared/types';
+
     // Props
-    export let table: {
-        id: number;
-        capacity: number;
-        minCapacity: number;
-        status: 'available' | 'reserved' | 'occupied';
-    };
+    export let table: Table;
 
     export let selectedTimeSlot: string;
-    export let tableStatuses: any; // หรือ type ที่เหมาะสม
-    export let getTableStatus: (id: number, timeSlot: string, statuses: any) => any;
-    export let getStatusColor: (status: string) => string;
-    export let getStatusIcon: (status: string) => string;
-    export let getStatusText: (status: string) => string;
+    export let tableStatuses: TableStatus[];
+    export let getTableStatus: GetTableStatusFn;
+    export let getStatusColor: GetStatusColorFn;
+    export let getStatusIcon: GetStatusIconFn;
+    export let getStatusText: GetStatusTextFn;
 
     // Event dispatcher
-    const dispatch = createEventDispatcher<{
-        click: typeof table;
-    }>();
+    const dispatch = createEventDispatcher<TableButtonEvents>();
 
     function handleClick() {
         dispatch('click', table);

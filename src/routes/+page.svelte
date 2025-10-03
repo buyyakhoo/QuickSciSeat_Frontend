@@ -4,7 +4,8 @@
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
-    import { tables, timeSlots, tableStatuses, getTableStatus, type Table, type TableStatus } from '$lib/data/mockData';
+    import { tables, timeSlots, tableStatuses, getTableStatus } from '$lib/data/mockData';
+   
     import ReservationModal from '$lib/components/ReservationModal.svelte';
     import StudentIDModal from '$lib/components/StudentIDModal.svelte';
     import DetailModal from '$lib/components/DetailModal.svelte';
@@ -16,18 +17,13 @@
     import TableButton from '$lib/components/TableButton.svelte';
     import UserCard from '$lib/components/UserCard.svelte';
 
+    import type { ReservationSubmitData, Session } from '$lib/shared/types';
+    import type { Table, TimeSlot, TableStatus } from '$lib/shared/types';
+
     import { browser } from '$app/environment';
 
     export let data: { 
-        session?: { 
-            user?: { 
-                name?: string; 
-                email?: string; 
-                image?: string; 
-                student_id?: string; 
-                role?: string; 
-            }; 
-        }; 
+        session?: Session;
     };
 
     let selectedTimeSlot = 'slot-8';
@@ -86,12 +82,7 @@
         }
     }
   
-    function handleReservationSubmit(event: CustomEvent<{
-        tableId: number;
-        timeSlot: string;
-        userName: string;
-        partySize: number;
-    }>) {
+    function handleReservationSubmit(event: CustomEvent<ReservationSubmitData>) {
         const data = event.detail;
         
         reservationData.userName = data.userName;

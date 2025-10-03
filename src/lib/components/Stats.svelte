@@ -1,5 +1,8 @@
 <script lang="ts">
-    let {stats, tables} = $props();
+    import type { TableStats, Table } from '$lib/shared/types';
+
+    export let stats: TableStats;
+    export let tables: Table[];
 
 </script>
 

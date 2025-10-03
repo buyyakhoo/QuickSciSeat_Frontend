@@ -1,24 +1,4 @@
-export interface Table {
-  id: number;
-  capacity: number;
-  minCapacity: number;
-  status: 'available' | 'reserved' | 'occupied';
-}
-
-export interface TimeSlot {
-  id: string;
-  startTime: string;
-  endTime: string;
-  displayTime: string;
-}
-
-export interface TableStatus {
-  tableId: number;
-  timeSlot: string;
-  status: 'available' | 'reserved' | 'occupied';
-  userName?: string;
-  partySize?: number;
-}
+import type { Table, TimeSlot, TableStatus } from '$lib/shared/types';
 
 // Generate time slots from 8:00 AM to 4:00 PM (8 slots)
 export const generateTimeSlots = (): TimeSlot[] => {

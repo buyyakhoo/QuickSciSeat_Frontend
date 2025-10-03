@@ -2,15 +2,10 @@
     import { Mail, User, LogOut, GraduationCap } from 'lucide-svelte';
     import { SignOut } from "@auth/sveltekit/components";
     import type { Session } from '@auth/sveltekit';
-    // import type { Session } from '@supabase/supabase-js';
+    import type { User as UserData } from '$lib/shared/types';
+
     export let session: { 
-        user?: { 
-            name?: string; 
-            email?: string; 
-            image?: string; 
-            student_id?: string; 
-            role?: string 
-        } 
+        user?: UserData
     };
 </script>
 

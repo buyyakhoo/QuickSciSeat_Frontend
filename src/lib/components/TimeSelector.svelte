@@ -1,10 +1,8 @@
 <script lang="ts">
-    export let timeSlots: Array<{
-        id: string;
-        startTime: string;
-        endTime: string;
-        displayTime: string;
-    }>;
+
+import type { TimeSlot } from '$lib/shared/types';
+
+    export let timeSlots: TimeSlot[];
     export let selectedTimeSlot: string;
 </script>
 

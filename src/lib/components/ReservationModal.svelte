@@ -3,28 +3,15 @@
     import { createEventDispatcher } from 'svelte';
     import { timeSlots } from '$lib/data/timeSlots';
 
+    import type { Table, ReservationData, ReservationModalEvents } from '$lib/shared/types';
+
     // Props
-    export let selectedTable: {
-        id: number;
-        capacity: number;
-        minCapacity: number;
-    };
+    export let selectedTable: Table;
     export let selectedTimeSlot: string;
-    export let reservationData: {
-        userName: string;
-        partySize: number;
-    };
+    export let reservationData: ReservationData;
 
     // Event dispatcher
-    const dispatch = createEventDispatcher<{
-        submit: {
-            tableId: number;
-            timeSlot: string;
-            userName: string;
-            partySize: number;
-        };
-        cancel: void;
-    }>();
+    const dispatch = createEventDispatcher<ReservationModalEvents>();
 
     // Handle form submission - extract data and dispatch
     function handleFormSubmit(event: SubmitEvent) {

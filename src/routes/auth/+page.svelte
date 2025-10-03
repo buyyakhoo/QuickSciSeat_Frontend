@@ -1,4 +1,3 @@
-<!-- src/routes/auth/+page.svelte -->
 <script lang="ts">
   import '../../app.css';
   import { SignIn } from "@auth/sveltekit/components";

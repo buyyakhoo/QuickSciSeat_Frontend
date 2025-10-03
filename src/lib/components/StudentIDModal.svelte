@@ -3,22 +3,17 @@
     import { ArrowLeft, GraduationCap, X } from "lucide-svelte";
     import { createEventDispatcher } from 'svelte';
 
-    export let selectedTable;
-    export let selectedTimeSlot;
-    export let reservationData: {
-        userName: string;
-        partySize: number;
-    };
+    import type { Table, TimeSlot, ReservationData, StudentIDModalEvents } from '$lib/shared/types';
+
+    export let selectedTable: Table;
+    export let selectedTimeSlot: string;
+    export let reservationData: ReservationData;
 
     // สร้าง array สำหรับเก็บรหัสนักศึกษา
     let studentIds = Array(reservationData.partySize).fill('');
 
     // Event dispatcher
-    const dispatch = createEventDispatcher<{
-        submit: { studentIds: string[] };
-        back: void;
-        cancel: void;
-    }>();
+    const dispatch = createEventDispatcher<StudentIDModalEvents>();
 
     function handleFormSubmit(event: Event) {
         event.preventDefault();
