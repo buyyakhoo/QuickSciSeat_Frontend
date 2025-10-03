@@ -17,7 +17,7 @@
     // ตรวจสอบ error จาก URL parameters
     const error = $page.url.searchParams.get('error');
     if (error === 'AccessDenied') {
-      errorMessage = 'กรุณาใช้ email @kmitl.ac.th หรือ @gmail.com เท่านั้น';
+      errorMessage = 'กรุณาใช้ email @kmitl.ac.th เท่านั้น';
     }
   });
 </script>
