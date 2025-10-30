@@ -32,6 +32,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth(async (event) => {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${account?.id_token || account?.access_token || ''}`
                         },
                         body: JSON.stringify({
                             user_id: student_id,
@@ -57,7 +58,13 @@ export const { handle, signIn, signOut } = SvelteKitAuth(async (event) => {
                         return false;
                     }
 
-                    console.log('User verified/created successfully!');
+                    if (data.token) {
+                        account.backendToken = data.token;
+                        console.log('Token received and stored:', data.token.substring(0, 20) + '...');
+                    }
+
+                    // (user as any).appToken = data.token;
+                    // console.log('User verified/created successfully!');
                     return true;
 
                 } catch (error) {
@@ -65,19 +72,38 @@ export const { handle, signIn, signOut } = SvelteKitAuth(async (event) => {
                     return false; 
                 }
             },
+
+            async jwt({ token, account }: { token: Record<string, any>, account?: any }) {
+                // เก็บ backend token จาก account ไว้ใน JWT token
+                if (account?.backendToken) {
+                    token.backendToken = account.backendToken;
+                }
+                return token;
+            },
+
             async session({ session, token }: { session: Record<string, any>, token: any }) {
                 console.log('test' + JSON.stringify(session));
+
+                if (token.backendToken) {
+                    session.backendToken = token.backendToken;
+                }
+
                 // เพิ่มข้อมูลเพิ่มเติมใน session
                 if (session.user?.email) {
                     // ตัวอย่างการดึงข้อมูลนักศึกษา
-                    const userData = await getUserDataFromBackend(session.user.email);
+                    const userData = await getUserDataFromBackend(session.user.email, session.backendToken);
                     
                     session.user = {
                         ...session.user,
                         student_id: userData?.student_id,
-                        role: userData?.role || 'student'
+                        role: userData?.role || 'student',
+                        // appToken: token?.appToken
+                        backendToken: token.backendToken 
                     };
                 }
+
+                session.backendToken = token.backendToken;
+
                 return {
                     ...session,
                     expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString() // Example: 7 days from now
@@ -89,7 +115,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth(async (event) => {
 });
 
 // ฟังก์ชันจำลองการดึงข้อมูลผู้ใช้
-async function getUserDataFromBackend(email: string) {
+async function getUserDataFromBackend(email: string, backendToken: string) {
     const username = email.split('@')[0];
     const student_id = username.substring(0, 8);
 
@@ -97,6 +123,7 @@ async function getUserDataFromBackend(email: string) {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${backendToken}`
         }
     })
 

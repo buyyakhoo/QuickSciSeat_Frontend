@@ -2,6 +2,12 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+@theme {
+  --color-primary-qss: #C80036;
+  --color-secondary-qss: #FF6969;
+  --color-accent-qss: #636D91;
+}
+
 html {
   scroll-behavior: smooth;
 }

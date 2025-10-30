@@ -10,7 +10,7 @@
     export let tableStatuses: TableStatus[];
     export let getTableStatus: GetTableStatusFn;
     export let getStatusColor: GetStatusColorFn;
-    export let getStatusIcon: GetStatusIconFn;
+    // export let getStatusIcon: GetStatusIconFn;
     export let getStatusText: GetStatusTextFn;
 
     // Event dispatcher
@@ -24,11 +24,11 @@
 </script>
 
 <button 
-    class="card shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 {getStatusColor(status.status)} border-2 cursor-pointer" 
+    class="card shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 {getStatusColor(status.status)} text-white cursor-pointer" 
     on:click={handleClick}
 >
     <div class="card-body p-3 text-center">
-        <div class="text-lg mb-1">{getStatusIcon(status.status)}</div>
+        <!-- <div class="text-lg mb-1">{getStatusIcon(status.status)}</div> -->
         <div class="text-lg font-bold">#{table.id}</div>
         <div class="text-xs">{table.capacity} ที่นั่ง</div>
         {#if table.minCapacity !== table.capacity}

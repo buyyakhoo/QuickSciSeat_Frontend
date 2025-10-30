@@ -26,7 +26,7 @@
 </script>
 
 <!-- Navbar -->
-<div class="navbar bg-primary text-primary-content shadow-lg sticky top-0 z-50">
+<div class="navbar bg-accent-qss text-primary-content shadow-lg sticky top-0 z-50">
     <div class="navbar-start">
         <a href="/" class="btn btn-ghost text-xl font-bold">🍽️ QuickSciSeat</a>
     </div>

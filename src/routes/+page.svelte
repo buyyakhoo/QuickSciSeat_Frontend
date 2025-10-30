@@ -128,9 +128,9 @@
     
     function getStatusColor(status: string): string {
         switch (status) {
-            case 'available': return 'bg-success text-success-content';
-            case 'reserved': return 'bg-warning text-warning-content';
-            case 'occupied': return 'bg-error text-error-content';
+            case 'available': return 'bg-accent-qss text-success-content';
+            case 'reserved': return 'bg-secondary-qss text-warning-content';
+            case 'occupied': return 'bg-primary-qss text-error-content';
             default: return 'bg-base-200 text-base-content';
         }
     }
@@ -193,9 +193,9 @@
         
         <!-- Tables -->
         {#each [
-            {title: '👥 โต๊ะ 2 ที่นั่ง (1-20)', tables: tables.filter(t => t.capacity === 2)},
-            {title: '👨‍👩‍👧‍👦 โต๊ะ 4 ที่นั่ง (21-40)', tables: tables.filter(t => t.capacity === 4)},
-            {title: '👨‍👩‍👧‍👧 โต๊ะ 6 ที่นั่ง (41-50)', tables: tables.filter(t => t.capacity === 6)}
+            {title: 'โต๊ะ 2 ที่นั่ง', tables: tables.filter(t => t.capacity === 2)},
+            {title: 'โต๊ะ 4 ที่นั่ง', tables: tables.filter(t => t.capacity === 4)},
+            {title: 'โต๊ะ 6 ที่นั่ง', tables: tables.filter(t => t.capacity === 6)}
         ] as group}
         <div class="mb-8">
             <h3 class="text-xl font-bold mb-4">{group.title}</h3>
@@ -209,7 +209,6 @@
                         {tableStatuses}
                         {getTableStatus}
                         {getStatusColor}
-                        {getStatusIcon}
                         {getStatusText} 
                         on:click={({ detail }) => handleTableClick(detail)}
                     />
