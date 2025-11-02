@@ -1,17 +1,18 @@
 import { SvelteKitAuth, type User } from "@auth/sveltekit"
 import Google from "@auth/sveltekit/providers/google"
 
-import { AUTH_GOOGLE_ID, AUTH_GOOGLE_SECRET, AUTH_SECRET, BACKEND_API_URL } from '$env/static/private';
+// import { AUTH_GOOGLE_ID, AUTH_GOOGLE_SECRET, AUTH_SECRET, BACKEND_API_URL } from '$env/static/private';
+import { env } from '$env/dynamic/private'
 
 export const { handle, signIn, signOut } = SvelteKitAuth(async (event) => {
     const authOptions = {
         providers: [
             Google({
-                clientId: AUTH_GOOGLE_ID,
-                clientSecret: AUTH_GOOGLE_SECRET
+                clientId: env.AUTH_GOOGLE_ID,
+                clientSecret: env.AUTH_GOOGLE_SECRET
             })
         ],
-        secret: AUTH_SECRET,
+        secret: env.AUTH_SECRET,
         trustHost: true,
         debug: true,
         callbacks: {
@@ -28,7 +29,9 @@ export const { handle, signIn, signOut } = SvelteKitAuth(async (event) => {
                     console.log('Email:', user.email);
                     console.log('Student ID:', student_id);
 
-                    const response = await fetch(`${BACKEND_API_URL}/user_service/verify-or-create`, {
+                    console.log('BACKEND_API_URL: ' + env.BACKEND_API_URL);
+
+                    const response = await fetch(`${env.BACKEND_API_URL}/user_service/verify-or-create`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -119,7 +122,7 @@ async function getUserDataFromBackend(email: string, backendToken: string) {
     const username = email.split('@')[0];
     const student_id = username.substring(0, 8);
 
-    const response = await fetch(`${BACKEND_API_URL}/user_service/user/${student_id}`, {
+    const response = await fetch(`${env.BACKEND_API_URL}/user_service/user/${student_id}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
