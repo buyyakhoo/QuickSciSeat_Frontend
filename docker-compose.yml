@@ -9,7 +9,12 @@ services:
       - AUTH_GOOGLE_SECRET=${AUTH_GOOGLE_SECRET}
       - AUTH_SECRET=${AUTH_SECRET}
       - BACKEND_API_URL=http://backend:3000
-      - AUTH_TRUST_HOST=${AUTH_TRUST_HOST}
+      - AUTH_TRUST_HOST=true
+      - AUTH_COOKIE_SECURE=true
+      - PORT=4173
+      - ORIGIN=http://localhost:4173
+      - PROTOCOL_HEADER=x-forwarded-proto
+      - HOST_HEADER=x-forwarded-host
     networks:
       - appnet
 
