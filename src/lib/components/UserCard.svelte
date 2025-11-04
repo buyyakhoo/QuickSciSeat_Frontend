@@ -19,19 +19,19 @@
                     </div>
                 </div>
                 <div>
-                    <h2 class="text-2xl font-bold text-base-content">สวัสดี {session.user?.name} 👋</h2>
+                    <h2 class="text-2xl font-bold text-base-content">Hello {session.user?.name}</h2>
                     <div class="flex flex-wrap gap-2 mt-1">
-                        <div class="badge badge-primary">
+                        <div class="badge bg-[var(--color-accent-qss)] text-white">
                             <Mail class="w-3 h-3 mr-1" />
                             {session.user?.email}
                         </div>
                         {#if session.user?.student_id}
-                        <div class="badge badge-secondary">
+                        <div class="badge bg-[var(--color-accent-qss)] text-white">
                             <GraduationCap class="w-3 h-3 mr-1" />
-                            รหัสนักศึกษา: {session.user.student_id}
+                            Student ID: {session.user.student_id}
                         </div>
                         {/if}
-                        <div class="badge badge-accent">
+                        <div class="badge bg-[var(--color-accent-qss)] text-white">
                             <User class="w-3 h-3 mr-1" />
                             {session.user?.role || 'student'}
                         </div>
@@ -42,7 +42,7 @@
                 <SignOut redirectTo="/auth">
                     <div slot="submitButton" class="btn btn-outline btn-sm">
                         <LogOut class="w-4 h-4" />
-                        ออกจากระบบ
+                        Logout
                     </div>
                 </SignOut>
             </div>

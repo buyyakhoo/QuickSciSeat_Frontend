@@ -11,7 +11,7 @@ import type { TimeSlot } from '$lib/shared/types';
         <h2 class="card-title mb-4">🕐 เลือกช่วงเวลา</h2>
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
             {#each timeSlots as slot}
-                <button class="btn {selectedTimeSlot === slot.id ? 'btn-error' : 'btn-ghost'}" onclick={() => selectedTimeSlot = slot.id}>
+                <button class="btn {selectedTimeSlot === slot.id ? 'bg-[var(--color-accent-qss)] text-white' : 'btn-ghost'}" onclick={() => selectedTimeSlot = slot.id}>
                 <div class="text-center">
                     <div class="font-bold text-xs">{slot.startTime}</div>
                     <div class="text-xs opacity-70">{slot.endTime}</div>

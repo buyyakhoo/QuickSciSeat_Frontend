@@ -174,13 +174,12 @@
 
 <!-- Content -->
 <div class="min-h-screen bg-base-200">
-    <div class="container mx-auto px-4 py-8 max-w-7xl">
-        
-        <!-- User Info Card -->
-         <UserCard {session} />
-        
+    <div class="container mx-auto px-4 py-8 max-w-7xl">    
         <!-- Header -->
         <Header />
+
+        <!-- User Info Card -->
+        <UserCard {session} />
         
         <!-- Stats -->
         <Stats {stats} {tables} />

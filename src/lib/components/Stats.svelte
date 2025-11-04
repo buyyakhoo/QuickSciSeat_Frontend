@@ -9,7 +9,7 @@
 <div class="stats stats-vertical lg:stats-horizontal shadow w-full mb-8">
     <div class="stat place-items-center">
         <div class="stat-title">โต๊ะว่าง</div>
-        <div class="stat-value text-neutral">{stats.available}</div>
+        <div class="stat-value text-accent-qss">{stats.available}</div>
         <div class="stat-desc">พร้อมใช้งาน</div>
     </div>
     <div class="stat place-items-center">
@@ -24,7 +24,7 @@
     </div>
     <div class="stat place-items-center">
         <div class="stat-title">โต๊ะทั้งหมด</div>
-        <div class="stat-value text-neutral">{tables.length}</div>
+        <div class="stat-value text-accent-qss">{tables.length}</div>
         <div class="stat-desc">รายการ</div>
     </div>
 </div>

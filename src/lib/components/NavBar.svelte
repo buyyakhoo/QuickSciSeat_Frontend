@@ -33,8 +33,8 @@
     
     <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal px-1">
-            <li><a href="/" class="active"><Home class="w-4 h-4" />หน้าแรก</a></li>
-            <li><a href="/"><Calendar class="w-4 h-4" />การจองของฉัน</a></li>
+            <li><a href="/" class="active"><Home class="w-4 h-4" />Homepage</a></li>
+            <li><a href="/"><Calendar class="w-4 h-4" />My Reservation</a></li>
         </ul>
     </div>
     
@@ -55,18 +55,18 @@
                         <span class="text-base-content">{session.user?.name || 'ผู้ใช้'}</span>
                         <span class="text-xs opacity-60">{session.user?.role || 'นักศึกษา'}</span>
                     </li>
-                    <li><a href="/" class="text-base-content"><User class="w-4 h-4" />โปรไฟล์</a></li>
+                    <li><a href="/profile" class="text-base-content"><User class="w-4 h-4" />Profile</a></li>
                     <li><hr class="my-1"></li>
                     <li>
                         <button on:click={toggleTheme} class="text-base-content">
-                            {#if currentTheme === 'light'}<Moon class="w-4 h-4" />โหมดมืด{:else}<Sun class="w-4 h-4" />โหมดสว่าง{/if}
+                            {#if currentTheme === 'light'}<Moon class="w-4 h-4" />Dark Mode{:else}<Sun class="w-4 h-4" />Light Mode{/if}
                         </button>
                     </li>
                     <li><hr class="my-1"></li>
                     <li>
                         <SignOut redirectTo="/auth">
                             <div slot="submitButton" class="text-error w-full text-left">
-                                <LogOut class="w-4 h-4 inline mr-2" />ออกจากระบบ
+                                <LogOut class="w-4 h-4 inline mr-2" />Sign Out
                             </div>
                         </SignOut>
                     </li>
