@@ -1,13 +1,15 @@
 <script lang="ts">
-    import { timeSlots } from "$lib/data/mockData";
+    // import { timeSlots } from "$lib/data/timeSlots";
     import { ArrowLeft, GraduationCap, X } from "lucide-svelte";
     import { createEventDispatcher } from 'svelte';
 
+    // import type { Table, TimeSlot, ReservationData, StudentIDModalEvents } from '$lib/shared/types';
     import type { Table, TimeSlot, ReservationData, StudentIDModalEvents } from '$lib/shared/types';
 
     export let selectedTable: Table;
     export let selectedTimeSlot: string;
     export let reservationData: ReservationData;
+    export let timeslots: TimeSlot[];
 
     // สร้าง array สำหรับเก็บรหัสนักศึกษา
     let studentIds = Array(reservationData.partySize).fill('');
@@ -37,6 +39,8 @@
     function handleCancel() {
         dispatch('cancel');
     }
+
+    $: selectedSlot = timeslots.find(slot => slot.id === selectedTimeSlot);
 </script>
 
 <div class="modal modal-open" role="dialog" tabindex="0" 
@@ -67,7 +71,7 @@
                     <div><span class="text-base-content/70">ผู้จอง:</span> <span class="font-bold">{reservationData.userName}</span></div>
                     <div><span class="text-base-content/70">โต๊ะ:</span> <span class="font-bold">#{selectedTable.id} ({selectedTable.capacity} ที่นั่ง)</span></div>
                     <div><span class="text-base-content/70">จำนวน:</span> <span class="font-bold">{reservationData.partySize} คน</span></div>
-                    <div><span class="text-base-content/70">เวลา:</span> <span class="font-bold">{timeSlots.find(slot => slot.id === selectedTimeSlot)?.displayTime}</span></div>
+                    <div><span class="text-base-content/70">เวลา:</span> <span class="font-bold">{selectedSlot?.startTime} - {selectedSlot?.endTime}</span></div>
                 </div>
             </div>
         </div>

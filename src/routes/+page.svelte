@@ -4,8 +4,10 @@
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
-    import { tables, timeSlots, tableStatuses, getTableStatus } from '$lib/data/mockData';
-   
+    import { tables, tableStatuses, getTableStatus } from '$lib/data/mockData';
+    // import { timeSlots } from '$lib/data/timeSlots';
+    // import { getTimeSlots } from '$lib/data/timeSlots';
+
     import ReservationModal from '$lib/components/ReservationModal.svelte';
     import StudentIDModal from '$lib/components/StudentIDModal.svelte';
     import DetailModal from '$lib/components/DetailModal.svelte';
@@ -26,7 +28,7 @@
         session?: Session;
     };
 
-    let selectedTimeSlot = 'slot-8';
+    let selectedTimeSlot = 'slot-08';
     
     // Modal states
     let showReservationModal = false;
@@ -45,11 +47,59 @@
     // ตรวจสอบ session จาก data ที่ส่งมาจาก server
     $: session = data.session;
 
+    let timeslots: TimeSlot[] = [];
+
+    const fetchTimeSlots = async () => {
+        try {
+            console.log('Fetching time slots from backend...');
+            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL
+
+            const response = await fetch(`${BACKEND_URL}/table_service/timeslots`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                console.error('Failed to fetch time slots:', response.status);
+            }
+
+            const data = await response.json();
+            
+            // Backend returns: { success: true, timeslots: [...] }
+            if (!data.success || !Array.isArray(data.timeslots)) {
+                console.error('Invalid response format:', data);
+            }
+
+            // Map backend fields to frontend TimeSlot type
+            const slots: TimeSlot[] = data.timeslots.map((slot: any) => ({
+                id: slot.slot_id,              
+                startTime: slot.start_at,      
+                endTime: slot.end_at,          
+                displayTime: `${slot.start_at} - ${slot.end_at}`
+            }));
+            console.log('Loaded', slots.length, 'time slots');
+            console.log(slots);
+            timeslots = slots;
+
+        } catch (error) {
+            console.error('Error fetching time slots:', error);
+            return [];
+        }
+    };
+
     // Redirect to auth if no session
-    onMount(() => {
+    onMount(async () => {
         if (!session) {
             goto('/auth');
         }
+
+        // console.log('Before Fetching Time Slots');
+
+        fetchTimeSlots();
+
+        // console.log('After Fetching Time Slots:', timeSlots);
     });
 
     $: if (!session && browser) {
@@ -96,7 +146,7 @@
     function handleStudentIdSubmit(event: CustomEvent<{ studentIds: string[] }>) {
         const studentIds = event.detail.studentIds;
         
-        alert(`จองโต๊ะ ${selectedTable?.id} สำเร็จ!\n\n• ผู้จอง: ${reservationData.userName}\n• จำนวน: ${reservationData.partySize} คน\n• เวลา: ${timeSlots.find(slot => slot.id === selectedTimeSlot)?.displayTime}\n• รหัสนักศึกษา: ${studentIds.join(', ')}\n\nกรุณา check-in ภายในเวลา!`);
+        alert(`จองโต๊ะ ${selectedTable?.id} สำเร็จ!\n\n• ผู้จอง: ${reservationData.userName}\n• จำนวน: ${reservationData.partySize} คน\n• เวลา: ${timeslots.find(slot => slot.id === selectedTimeSlot)?.displayTime}\n• รหัสนักศึกษา: ${studentIds.join(', ')}\n\nกรุณา check-in ภายในเวลา!`);
         
         showStudentIdModal = false;
         resetReservationData();
@@ -185,7 +235,7 @@
         <Stats {stats} {tables} />
         
         <!-- Time Selector -->
-        <TimeSelector {timeSlots} bind:selectedTimeSlot />
+        <TimeSelector {timeslots} bind:selectedTimeSlot />
         
         <!-- Legend -->
         <Legend />
@@ -226,6 +276,7 @@
         {selectedTable} 
         {selectedTimeSlot} 
         {reservationData} 
+        {timeslots}
         on:submit={handleReservationSubmit} 
         on:cancel={() => {showReservationModal = false; resetReservationData();}} 
     />
@@ -237,6 +288,7 @@
         {selectedTable}
         {selectedTimeSlot}
         {reservationData}
+        {timeslots}
         on:submit={handleStudentIdSubmit}
         on:back={handleBackToReservation}
         on:cancel={() => {showStudentIdModal = false; resetReservationData();}}
@@ -249,6 +301,7 @@
         {selectedTable}
         {selectedTimeSlot}
         {selectedTableStatus}
+        {timeslots}
         {getStatusText}
         {getStatusIcon}
         on:close={() => showDetailModal = false}

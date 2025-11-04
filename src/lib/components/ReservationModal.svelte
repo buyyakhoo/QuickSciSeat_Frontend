@@ -1,14 +1,15 @@
 <script lang="ts">
     import { X, User, Users, CheckCircle } from 'lucide-svelte';
     import { createEventDispatcher } from 'svelte';
-    import { timeSlots } from '$lib/data/timeSlots';
+    // import { timeSlots } from '$lib/data/timeSlots';
 
-    import type { Table, ReservationData, ReservationModalEvents } from '$lib/shared/types';
+    import type { Table, TimeSlot, ReservationData, ReservationModalEvents } from '$lib/shared/types';
 
     // Props
     export let selectedTable: Table;
     export let selectedTimeSlot: string;
     export let reservationData: ReservationData;
+    export let timeslots: TimeSlot[];
 
     // Event dispatcher
     const dispatch = createEventDispatcher<ReservationModalEvents>();
@@ -25,6 +26,8 @@
             partySize: reservationData.partySize
         });
     }
+
+    $: selectedSlot = timeslots.find(slot => slot.id === selectedTimeSlot);
 </script>
 
 <div class="modal modal-open" role="dialog" tabindex="0" on:click|self={() => dispatch('cancel')} on:keydown|self={(e) => e.key === 'Escape' && dispatch('cancel')} aria-label="Close reservation modal">
@@ -69,7 +72,7 @@
                     <h5 class="card-title text-lg">📋 สรุปการจอง</h5>
                     <div class="grid grid-cols-2 gap-4">
                         <div><span class="text-base-content/70">โต๊ะ:</span> <span class="font-bold">#{selectedTable.id} ({selectedTable.capacity} ที่นั่ง)</span></div>
-                        <div><span class="text-base-content/70">เวลา:</span> <span class="font-bold">{timeSlots.find(slot => slot.id === selectedTimeSlot)?.displayTime}</span></div>
+                        <div><span class="text-base-content/70">เวลา:</span> <span class="font-bold">{selectedSlot?.displayTime}</span></div>
                     </div>
                 </div>
             </div>

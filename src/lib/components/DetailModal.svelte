@@ -1,14 +1,17 @@
 <script lang="ts">
     import { X, User, Mail, Phone, Calendar, LogIn, LogOut } from 'lucide-svelte';
     import { createEventDispatcher } from 'svelte';
-    import { timeSlots } from '$lib/data/mockData';
+    // import { timeSlots } from '$lib/data/mockData';
 
     import type { Table, TableStatus, GetStatusTextFn, GetStatusIconFn, DetailModalEvents } from '$lib/shared/types';
+
+    import type { TimeSlot } from '$lib/shared/types';
 
     // Props
     export let selectedTable: Table;
     export let selectedTimeSlot: string;
     export let selectedTableStatus: TableStatus;
+    export let timeslots: TimeSlot[];
     export let getStatusText: GetStatusTextFn;
     export let getStatusIcon: GetStatusIconFn;
 
@@ -30,6 +33,8 @@
     function handleCheckOut() {
         dispatch('checkout');
     }
+
+    $: selectedSlot = timeslots.find(slot => slot.id === selectedTimeSlot);
 </script>
 
 <div class="modal modal-open" role="dialog" tabindex="0" 
@@ -56,7 +61,7 @@
                         {/if}
                     </div>
                     <div>
-                        <div class="font-bold">{timeSlots.find(slot => slot.id === selectedTimeSlot)?.displayTime}</div>
+                        <div class="font-bold">{selectedSlot?.displayTime}</div>
                     </div>
                 </div>
                 <div class="divider"></div>

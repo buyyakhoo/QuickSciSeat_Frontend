@@ -110,6 +110,6 @@ export const getTableStatus = (tableId: number, timeSlotId: string, tableStatuse
 };
 
 // Export instances
-export const timeSlots = generateTimeSlots();
+// export const timeSlots = generateTimeSlots();
 export const tables = generateTables();
 export const tableStatuses = generateTableStatuses();
