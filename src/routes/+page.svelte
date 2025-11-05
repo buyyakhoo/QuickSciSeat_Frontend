@@ -4,7 +4,8 @@
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
-    import { tables, tableStatuses, getTableStatus } from '$lib/data/mockData';
+    // import { tables, tableStatuses, getTableStatus } from '$lib/data/mockData';
+    // import { getTableStatus } from '$lib/data/mockData';
     // import { timeSlots } from '$lib/data/timeSlots';
     // import { getTimeSlots } from '$lib/data/timeSlots';
 
@@ -35,7 +36,7 @@
     let showDetailModal = false;
     let showStudentIdModal = false;
     let selectedTable: Table;
-    let selectedTableStatus: TableStatus | null = null;
+    let selectedTableStatus: TableStatus;
     
     // Form data
     let reservationData = {
@@ -85,10 +86,106 @@
 
         } catch (error) {
             console.error('Error fetching time slots:', error);
-            return [];
         }
     };
 
+    let tables: Table[] = [];
+
+    const fetchTables = async () => {
+        try {
+            console.log('Fetching tables from backend...');
+            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL
+
+            const response = await fetch(`${BACKEND_URL}/table_service/tables`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                console.error('Failed to fetch tables:', response.status);
+            }
+
+            const data = await response.json();
+            
+            // Backend returns: { success: true, tables: [...] }
+            if (!data.success || !Array.isArray(data.tables)) {
+                console.error('Invalid response format:', data);
+            }
+
+            // Map backend fields to frontend Table type
+            const tbls: Table[] = data.tables.map((table: any) => ({
+                id: table.table_id,
+                capacity: table.capacity,
+                minCapacity: table.min_capacity
+            }));
+            console.log('Loaded', tbls.length, 'tables');
+            console.log(tbls);
+            tables = tbls;
+        } catch (error) {
+            console.error('Error fetching tables:', error);
+        }
+    }
+
+
+    let tableStatuses: TableStatus[] = [];
+
+    const fetchTableStatuses = async () => {
+        try {
+            console.log('Fetching table statuses from backend...');
+            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL
+
+            const response = await fetch(`${BACKEND_URL}/table_service/timeslot/all/tables`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                console.error('Failed to fetch table statuses:', response.status);
+            }
+
+            const data = await response.json();
+
+            console.log("THIS IS FETCHTABLESTATUS: " + JSON.stringify(data));
+            
+            // เช็คว่า data เป็น array หรือ object
+            let statusArray: any[] = [];
+            
+            if (Array.isArray(data)) {
+                // Backend return array โดยตรง: [{...}, {...}]
+                console.log('Data is array');
+                statusArray = data;
+            } else if (data.success && Array.isArray(data.table_statuses)) {
+                // Backend return object: { success: true, table_statuses: [...] }
+                console.log('Data is object with table_statuses');
+                statusArray = data.table_statuses;
+            } else {
+                console.error('Invalid response format');
+                return;
+            }
+
+            console.log('Loaded table statuses:', data.table_statuses);
+
+            tableStatuses = statusArray.map((table: any) => ({
+                tableId: table.table_id,
+                timeSlot: table.slot_id,
+                // tableCode: table.table_code,
+                status: table.status,
+                // capacity: table.capacity,
+                // minCapacity: table.min_capacity
+            }));
+
+            console.log('Loaded', tableStatuses.length, 'table statuses');
+
+        } catch (error) {
+            console.error('Error fetching table statuses:', error);
+        }
+    };
+
+    
     // Redirect to auth if no session
     onMount(async () => {
         if (!session) {
@@ -97,7 +194,14 @@
 
         // console.log('Before Fetching Time Slots');
 
-        fetchTimeSlots();
+        await fetchTimeSlots();
+        await fetchTables();
+
+        console.log("------- BEFORE FETCHING TABLE STATUSES -------");
+        await fetchTableStatuses();
+        console.log("------- AFTER FETCHING TABLE STATUSES -------");
+
+        tableStatusesSelected = getTableStatusesSelectSlot(selectedTimeSlot);
 
         // console.log('After Fetching Time Slots:', timeSlots);
     });
@@ -118,13 +222,24 @@
             studentIds: []
         };
     }
+
+    function getTableStatus(tableId: number, timeSlot: string, statuses: TableStatus[]): TableStatus {
+        const status = statuses.find(ts => ts.tableId === tableId && ts.timeSlot === timeSlot);
+        return status || { tableId, timeSlot, status: 'occupied' };
+    }
   
     function handleTableClick(table: Table) {
-        const status = getTableStatus(table.id, selectedTimeSlot, tableStatuses);
+        // const status = getTableStatus(table.id, selectedTimeSlot, tableStatuses);
+        const tableSelected = getTableStatus(table.id, selectedTimeSlot, tableStatuses);
+        console.log('Table clicked:', table, 'Status:', tableSelected);
         selectedTable = table;
-        selectedTableStatus = status;
+        selectedTableStatus = {
+            tableId: tableSelected?.tableId || table.id,
+            timeSlot: selectedTimeSlot,
+            status: tableSelected?.status || 'available',
+        }
         
-        if (status.status === 'available') {
+        if (tableSelected?.status === 'available') {
             resetReservationData();
             showReservationModal = true;
         } else {
@@ -194,15 +309,20 @@
         }
     }
 
+    function getTableStatusesSelectSlot(slot_id: string): TableStatus[] {
+        return tableStatuses.filter(ts => ts.timeSlot === slot_id);
+    }
+
+    $: tableStatusesSelected = getTableStatusesSelectSlot(selectedTimeSlot);
+
     $: stats = (() => {
         let available = 0, reserved = 0, occupied = 0;
-        tables.forEach((table: Table) => {
-            const status = getTableStatus(table.id, selectedTimeSlot, tableStatuses);
-            if (status.status === 'available') available++;
-            else if (status.status === 'reserved') reserved++;
-            else if (status.status === 'occupied') occupied++;
+        tableStatusesSelected.forEach((table: TableStatus) => {
+            if (table.status === 'available') available++;
+            else if (table.status === 'reserved') reserved++;
+            else if (table.status === 'occupied') occupied++;
         });
-        return { available, reserved, occupied };
+        return { available, reserved, occupied};
     })();
 </script>
 

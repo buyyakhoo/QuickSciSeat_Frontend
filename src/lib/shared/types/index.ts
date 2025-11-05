@@ -17,7 +17,7 @@ export interface Table {
     id: number;
     capacity: number;
     minCapacity: number;
-    status?: 'available' | 'reserved' | 'occupied';
+    // status?: 'available' | 'reserved' | 'occupied';
 }
 
 export type TableStatusType = 'available' | 'reserved' | 'occupied';
