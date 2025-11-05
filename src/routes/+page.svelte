@@ -24,6 +24,7 @@
     import type { Table, TimeSlot, TableStatus } from '$lib/shared/types';
 
     import { browser } from '$app/environment';
+    // import { VITE_BACKEND_API_URL } from '$env/static/private';
 
     export let data: { 
         session?: Session;
@@ -228,7 +229,7 @@
         return status || { tableId, timeSlot, status: 'occupied' };
     }
   
-    function handleTableClick(table: Table) {
+    async function handleTableClick(table: Table) {
         // const status = getTableStatus(table.id, selectedTimeSlot, tableStatuses);
         const tableSelected = getTableStatus(table.id, selectedTimeSlot, tableStatuses);
         console.log('Table clicked:', table, 'Status:', tableSelected);
@@ -238,12 +239,32 @@
             timeSlot: selectedTimeSlot,
             status: tableSelected?.status || 'available',
         }
+
+        const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL;
+        const checkReservationResponse = await fetch(`${BACKEND_URL}/reservation_service/check/${session?.user?.student_id}/reservation`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        const reservationCheck = await checkReservationResponse.json();
+        const tableReservedStatus = reservationCheck.status;
+        const tableReservedID = reservationCheck.tableReservation.reservationtable[0].table_id;
+        const tableReservedTimeSlotCode = reservationCheck.tableReservation.reservationtable[0].timeslot.slot_id;
+
+        console.log('Reservation check:', reservationCheck);
+        console.log('tableReservedID:', tableReservedID, " selected table id:", table.id);
+        console.log('tableReservedTimeSlotCode:', tableReservedTimeSlotCode, " selectedTimeSlot:", selectedTimeSlot);
         
-        if (tableSelected?.status === 'available') {
+        if (tableSelected?.status === 'available' && !tableReservedStatus) {
             resetReservationData();
             showReservationModal = true;
-        } else {
+        } else if (tableSelected?.status === 'available' && tableReservedStatus) {
+            alert('คุณมีการจองโต๊ะอยู่แล้ว ไม่สามารถจองโต๊ะเพิ่มได้ กรุณายกเลิกการจองเดิมก่อน');
+        } else if ((tableSelected?.status === 'reserved' || tableSelected?.status === 'occupied') && tableReservedID === table.id && tableReservedTimeSlotCode === selectedTimeSlot) {
             showDetailModal = true;
+        } else {
+            alert('คุณได้ทำการจองไว้แล้ว กรุณาเลือกโต๊ะที่คุณจองไว้เท่านั้น');
         }
     }
   
@@ -258,13 +279,70 @@
         showStudentIdModal = true;
     }
   
-    function handleStudentIdSubmit(event: CustomEvent<{ studentIds: string[] }>) {
+    async function handleStudentIdSubmit(event: CustomEvent<{ studentIds: string[] }>) {
         const studentIds = event.detail.studentIds;
-        
-        alert(`จองโต๊ะ ${selectedTable?.id} สำเร็จ!\n\n• ผู้จอง: ${reservationData.userName}\n• จำนวน: ${reservationData.partySize} คน\n• เวลา: ${timeslots.find(slot => slot.id === selectedTimeSlot)?.displayTime}\n• รหัสนักศึกษา: ${studentIds.join(', ')}\n\nกรุณา check-in ภายในเวลา!`);
-        
-        showStudentIdModal = false;
-        resetReservationData();
+
+        try {
+            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL
+
+            const timeslotResponse = await fetch(
+                `${BACKEND_URL}/table_service/timeslot/${selectedTimeSlot}/table/${selectedTable.id}`
+            );
+            
+            const timeslotData = await timeslotResponse.json();
+            const timeslot_id = timeslotData?.timeslot?.timeslot_id;
+
+            const reservationPayload = {
+                user_id: session?.user?.student_id,
+                timeslot_id: timeslot_id,
+                party_size: reservationData.partySize,
+                table_ids: [selectedTable.id],
+                student_ids: studentIds
+            };
+
+            const response = await fetch(`${BACKEND_URL}/reservation_service/reservation`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(reservationPayload)
+            });
+
+            if (!response.ok) {
+                // Try to parse error body from backend to show a helpful message
+                let errMessage = `Failed to submit reservation: ${response.status}`;
+                try {
+                    const errBody = await response.json();
+                    const backendMsg = errBody?.error_th ?? errBody?.message ?? null;
+                    const existingId = errBody?.existing_reservation_id ?? null;
+                    if (backendMsg) {
+                        errMessage = backendMsg;
+                    } else {
+                        // fallback to stringified body if no known fields
+                        errMessage = JSON.stringify(errBody);
+                    }
+                    if (existingId) {
+                        errMessage += `ในโต๊ะที่ ${existingId}`;
+                    }
+                } catch (e) {
+                    // ignore JSON parse errors and keep the generic message
+                }
+                alert(errMessage);
+                throw new Error(errMessage);
+            }
+
+            console.log('Submitting reservation with payload:', reservationPayload);
+            
+
+            alert(`จองโต๊ะ ${selectedTable?.id} สำเร็จ!\n\n• ผู้จอง: ${reservationData.userName}\n• จำนวน: ${reservationData.partySize} คน\n• เวลา: ${timeslots.find(slot => slot.id === selectedTimeSlot)?.displayTime}\n• รหัสนักศึกษา: ${studentIds.join(', ')}\n\nกรุณา check-in ภายในเวลา!`);
+            
+            await fetchTableStatuses();
+            tableStatusesSelected = getTableStatusesSelectSlot(selectedTimeSlot);
+        } catch (error) {
+            console.error('Error submitting reservation:', error);
+            alert('เกิดข้อผิดพลาดในการจองโต๊ะ กรุณาลองใหม่อีกครั้ง');
+        } finally {
+            showStudentIdModal = false;
+            resetReservationData();
+        }
     }
   
     function handleBackToReservation() {
