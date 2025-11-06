@@ -3,7 +3,7 @@
     import { SignOut } from "@auth/sveltekit/components";
     import { onMount } from "svelte";
 
-    import type { User as UserData } from '$lib/shared/types';
+    import type { UserStu as UserData } from '$lib/shared/types';
 
     export let session: { 
         user?: UserData
@@ -34,7 +34,7 @@
     <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal px-1">
             <li><a href="/" class="active"><Home class="w-4 h-4" />Homepage</a></li>
-            <li><a href="/"><Calendar class="w-4 h-4" />My Reservation</a></li>
+            <li><a href="/reservation"><Calendar class="w-4 h-4" />My Reservation</a></li>
         </ul>
     </div>
     

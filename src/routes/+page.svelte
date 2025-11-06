@@ -122,7 +122,9 @@
             const tbls: Table[] = data.tables.map((table: any) => ({
                 id: table.table_id,
                 capacity: table.capacity,
-                minCapacity: table.min_capacity
+                minCapacity: table.min_capacity,
+                floor_id: table.floor.floor_id,
+                floor_name: table.floor.floor_name
             }));
             console.log('Loaded', tbls.length, 'tables');
             console.log(tbls);
@@ -233,7 +235,6 @@
     }
   
     async function handleTableClick(table: Table) {
-        // const status = getTableStatus(table.id, selectedTimeSlot, tableStatuses);
         const tableSelected = getTableStatus(table.id, selectedTimeSlot, tableStatuses);
         console.log('Table clicked:', table, 'Status:', tableSelected);
         selectedTable = table;
@@ -244,12 +245,18 @@
         }
 
         const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL;
-        const checkReservationResponse = await fetch(`${BACKEND_URL}/reservation_service/check/${session?.user?.student_id}/reservation`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
+        
+        // ใช้ endpoint ใหม่ที่มี table_id และ slot_id
+        const checkReservationResponse = await fetch(
+            `${BACKEND_URL}/reservation_service/check/${session?.user?.student_id}/reservation`,
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
             }
-        });
+        );
+        
         const reservationCheck = await checkReservationResponse.json();
         const tableReservedStatus = reservationCheck.status;
         const tableReservedID = reservationCheck.tableReservation?.reservationtable[0].table_id;
@@ -351,13 +358,6 @@
         showReservationModal = true;
     }
   
-    // async function handleCheckIn() {
-
-
-
-    //     alert(`Check-in โต๊ะ ${selectedTable?.id} สำเร็จ! เริ่มใช้งานได้เลย`);
-    //     showDetailModal = false;
-    // }
     async function handleCheckIn() {
         try {
             const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL;
@@ -379,7 +379,7 @@
 
             // 2. หา reservation_id จาก backend
             const checkResponse = await fetch(
-                `${BACKEND_URL}/reservation_service/check/${user_id}/reservation`
+                `${BACKEND_URL}/reservation_service/check/${user_id}/${selectedTable.id}/${selectedTimeSlot}/reservation`
             );
 
             if (!checkResponse.ok) {
@@ -403,7 +403,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     reservation_id,
-                    user_id  // ตอนนี้เป็น number แล้ว
+                    user_id
                 })
             });
 
@@ -455,7 +455,7 @@
 
             // 2. หา reservation_id
             const checkResponse = await fetch(
-                `${BACKEND_URL}/reservation_service/check/${user_id}/reservation`
+                `${BACKEND_URL}/reservation_service/check/${user_id}/${selectedTable.id}/${selectedTimeSlot}/reservation`
             );
 
             if (!checkResponse.ok) {
@@ -586,9 +586,8 @@
         
         <!-- Tables -->
         {#each [
-            {title: 'โต๊ะ 2 ที่นั่ง', tables: tables.filter(t => t.capacity === 2)},
-            {title: 'โต๊ะ 4 ที่นั่ง', tables: tables.filter(t => t.capacity === 4)},
-            {title: 'โต๊ะ 6 ที่นั่ง', tables: tables.filter(t => t.capacity === 6)}
+            {title: 'ชั้น 1', tables: tables.filter(t => t.floor_id === 1)},
+            {title: 'ชั้น 2', tables: tables.filter(t => t.floor_id === 2)},
         ] as group}
         <div class="mb-8">
             <h3 class="text-xl font-bold mb-4">{group.title}</h3>
