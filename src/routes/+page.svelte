@@ -237,7 +237,7 @@
         selectedTableStatus = {
             tableId: tableSelected?.tableId || table.id,
             timeSlot: selectedTimeSlot,
-            status: tableSelected?.status || 'available',
+            status: tableSelected?.status,
         }
 
         const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL;
@@ -249,13 +249,11 @@
         });
         const reservationCheck = await checkReservationResponse.json();
         const tableReservedStatus = reservationCheck.status;
-        const tableReservedID = reservationCheck.tableReservation.reservationtable[0].table_id;
-        const tableReservedTimeSlotCode = reservationCheck.tableReservation.reservationtable[0].timeslot.slot_id;
+        const tableReservedID = reservationCheck.tableReservation?.reservationtable[0].table_id;
+        const tableReservedTimeSlotCode = reservationCheck.tableReservation?.reservationtable[0].timeslot.slot_id;
 
         console.log('Reservation check:', reservationCheck);
-        console.log('tableReservedID:', tableReservedID, " selected table id:", table.id);
-        console.log('tableReservedTimeSlotCode:', tableReservedTimeSlotCode, " selectedTimeSlot:", selectedTimeSlot);
-        
+
         if (tableSelected?.status === 'available' && !tableReservedStatus) {
             resetReservationData();
             showReservationModal = true;
@@ -350,14 +348,159 @@
         showReservationModal = true;
     }
   
-    function handleCheckIn() {
-        alert(`Check-in โต๊ะ ${selectedTable?.id} สำเร็จ! เริ่มใช้งานได้เลย`);
-        showDetailModal = false;
+    // async function handleCheckIn() {
+
+
+
+    //     alert(`Check-in โต๊ะ ${selectedTable?.id} สำเร็จ! เริ่มใช้งานได้เลย`);
+    //     showDetailModal = false;
+    // }
+    async function handleCheckIn() {
+        try {
+            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL;
+
+            // 1. ดึงข้อมูล user_id และตรวจสอบ
+            const user_id_str = session?.user?.student_id;
+            
+            if (!user_id_str) {
+                alert('ไม่พบข้อมูลผู้ใช้');
+                return;
+            }
+
+            const user_id = parseInt(user_id_str); // แปลงเป็น number
+
+            if (isNaN(user_id)) {
+                alert('รหัสผู้ใช้ไม่ถูกต้อง');
+                return;
+            }
+
+            // 2. หา reservation_id จาก backend
+            const checkResponse = await fetch(
+                `${BACKEND_URL}/reservation_service/check/${user_id}/reservation`
+            );
+
+            if (!checkResponse.ok) {
+                throw new Error('Failed to check reservation');
+            }
+
+            const checkData = await checkResponse.json();
+            
+            if (!checkData.status || !checkData.tableReservation) {
+                alert('ไม่พบการจองของคุณ');
+                return;
+            }
+
+            const reservation_id = checkData.tableReservation.reservation_id;
+
+            // 3. เรียก Check-in API
+            console.log('Checking in with reservation_id:', reservation_id, 'user_id:', user_id);
+
+            const response = await fetch(`${BACKEND_URL}/reservation_service/reservation/checkin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    reservation_id,
+                    user_id  // ตอนนี้เป็น number แล้ว
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error_th || errorData.error || 'Check-in failed');
+            }
+
+            const result = await response.json();
+            console.log('Check-in successful:', result);
+
+            // 4. แสดงข้อความสำเร็จ
+            alert(`Check-in โต๊ะ ${selectedTable?.id} สำเร็จ!\n\nเริ่มใช้งานได้เลย\nCheckin ID: ${result.checkin_id}`);
+            
+            // 5. รีเฟรชข้อมูลโต๊ะ
+            await fetchTableStatuses();
+            tableStatusesSelected = getTableStatusesSelectSlot(selectedTimeSlot);
+
+            showDetailModal = false;
+
+        } catch (error) {
+            console.error('Error during check-in:', error);
+            alert(`เกิดข้อผิดพลาด: ${error instanceof Error ? error.message : 'กรุณาลองใหม่อีกครั้ง'}`);
+        }
     }
-    
-    function handleCheckOut() {
-        alert(`Check-out โต๊ะ ${selectedTable?.id} สำเร็จ! ขอบคุณที่ใช้บริการ`);
-        showDetailModal = false;
+
+    // function handleCheckOut() {
+    //     alert(`Check-out โต๊ะ ${selectedTable?.id} สำเร็จ! ขอบคุณที่ใช้บริการ`);
+    //     showDetailModal = false;
+    // }
+    async function handleCheckOut() {
+        try {
+            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL;
+            
+            // 1. ดึงข้อมูล user_id และตรวจสอบ
+            const user_id_str = session?.user?.student_id;
+            
+            if (!user_id_str) {
+                alert('ไม่พบข้อมูลผู้ใช้');
+                return;
+            }
+
+            const user_id = parseInt(user_id_str); // แปลงเป็น number
+
+            if (isNaN(user_id)) {
+                alert('รหัสผู้ใช้ไม่ถูกต้อง');
+                return;
+            }
+
+            // 2. หา reservation_id
+            const checkResponse = await fetch(
+                `${BACKEND_URL}/reservation_service/check/${user_id}/reservation`
+            );
+
+            if (!checkResponse.ok) {
+                throw new Error('Failed to check reservation');
+            }
+
+            const checkData = await checkResponse.json();
+            
+            if (!checkData.status || !checkData.tableReservation) {
+                alert('ไม่พบการจองของคุณ');
+                return;
+            }
+
+            const reservation_id = checkData.tableReservation.reservation_id;
+
+            // 3. เรียก Check-out API
+            console.log('Checking out with reservation_id:', reservation_id, 'user_id:', user_id);
+
+            const response = await fetch(`${BACKEND_URL}/reservation_service/reservation/checkout`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    reservation_id,
+                    user_id 
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error_th || errorData.error || 'Check-out failed');
+            }
+
+            const result = await response.json();
+            console.log('Check-out successful:', result);
+
+            // 4. แสดงข้อความสำเร็จ
+            alert(`Check-out โต๊ะ ${selectedTable?.id} สำเร็จ!\n\nขอบคุณที่ใช้บริการ`);
+            
+            // 5. รีเฟรชข้อมูลโต๊ะ
+            await fetchTableStatuses();
+            tableStatusesSelected = getTableStatusesSelectSlot(selectedTimeSlot);
+
+            showDetailModal = false;
+
+        } catch (error) {
+            console.error('Error during check-out:', error);
+            alert(`เกิดข้อผิดพลาด: ${error instanceof Error ? error.message : 'กรุณาลองใหม่อีกครั้ง'}`);
+        }
     }
   
     function getStatusText(status: string): string {
