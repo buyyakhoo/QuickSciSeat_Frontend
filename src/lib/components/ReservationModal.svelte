@@ -86,7 +86,7 @@
             
             <div class="modal-action">
                 <button type="button" class="btn btn-ghost" on:click={() => dispatch('cancel')}>ยกเลิก</button>
-                <button type="submit" class="btn btn-primary"><CheckCircle class="w-5 h-5" />ถัดไป: กรอกรหัสนักศึกษา</button>
+                <button type="submit" class="btn bg-accent-qss text-white"><CheckCircle class="w-5 h-5" />ถัดไป: กรอกรหัสนักศึกษา</button>
             </div>
         </form>
     </div>

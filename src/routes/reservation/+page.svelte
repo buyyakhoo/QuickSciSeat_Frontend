@@ -2,6 +2,9 @@
     import '../../app.css';
     import { onMount } from 'svelte';
     import { Calendar, Clock, Users, AlertCircle, X, Check, LogOut } from 'lucide-svelte';
+    import { goto } from '$app/navigation';
+    import { browser } from '$app/environment';
+
     import type { 
         Session,
         BackendReservation,
@@ -39,8 +42,15 @@
     })();
     
     onMount(async () => {
+        if (!session) {
+            goto('/auth');
+        }
         await loadReservations();
     });
+
+    $: if (!session && browser) {
+        window.location.href = '/auth';
+    }
     
     async function loadReservations() {
         loading = true;
@@ -306,7 +316,7 @@
                                     <div class="mt-6 flex flex-col gap-2">
                                         {#if currentReservation.canCheckin}
                                             <button 
-                                                class="btn btn-success w-full"
+                                                class="btn bg-secondary-qss text-white w-full"
                                                 on:click={() => {
                                                     if (currentReservation) {
                                                         checkinReservation(currentReservation.reservation_id);
@@ -325,7 +335,7 @@
                                         
                                         {#if currentReservation.canCheckout}
                                             <button 
-                                                class="btn btn-primary w-full"
+                                                class="btn bg-black text-white w-full"
                                                 on:click={() => {
                                                     if (currentReservation) {
                                                         checkoutReservation(currentReservation.reservation_id);
@@ -344,7 +354,7 @@
                                         
                                         {#if currentReservation.canCancel}
                                             <button 
-                                                class="btn btn-error w-full"
+                                                class="btn bg-primary-qss text-white w-full"
                                                 on:click={() => {
                                                     if (currentReservation) {
                                                         cancelReservation(currentReservation.reservation_id);
@@ -369,7 +379,7 @@
                             <div class="card-body items-center text-center">
                                 <AlertCircle class="w-16 h-16 text-base-content/40 mb-4" />
                                 <p class="text-base-content/70">ไม่มีการจองในขณะนี้</p>
-                                <a href="/" class="btn btn-primary mt-4">จองโต๊ะ</a>
+                                <a href="/" class="btn bg-accent-qss text-white mt-4">จองโต๊ะ</a>
                             </div>
                         </div>
                     {/if}
@@ -395,7 +405,7 @@
                                                     <div class="flex items-center gap-2 flex-wrap">
                                                         <span class="badge badge-neutral font-semibold">{getReservationNumber(reservation.reservation_id)}</span>
                                                         <span class="text-sm text-base-content/70">
-                                                            {reservation.timeslot?.start_at}
+                                                            รอบ {reservation.timeslot?.start_at}
                                                         </span>
                                                         <span class="text-sm font-semibold text-base-content">
                                                             {reservation.timeslot?.start_at} - {reservation.timeslot?.end_at}

@@ -92,9 +92,9 @@
                     <Calendar class="w-4 h-4" />จองโต๊ะนี้
                 </button>
             {:else if selectedTableStatus.status === 'reserved'}
-                <button class="btn btn-success" on:click={handleCheckIn}><LogIn class="w-4 h-4" />Check-in</button>
+                <button class="btn bg-secondary-qss text-black" on:click={handleCheckIn}><LogIn class="w-4 h-4" />Check-in</button>
             {:else if selectedTableStatus.status === 'occupied'}
-                <button class="btn btn-info" on:click={handleCheckOut}><LogOut class="w-4 h-4" />Check-out</button>
+                <button class="btn bg-black text-white" on:click={handleCheckOut}><LogOut class="w-4 h-4" />Check-out</button>
             {/if}
         </div>
     </div>

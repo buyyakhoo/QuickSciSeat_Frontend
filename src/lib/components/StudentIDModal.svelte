@@ -90,7 +90,7 @@
                                     <span class="label-text font-medium">คนที่ {index + 1} {index === 0 ? '(ผู้จอง)' : ''} *</span>
                                 </label>
                                 <div class="input-group">
-                                    <span class="bg-primary text-primary-content px-3 flex items-center text-sm font-bold">
+                                    <span class="bg-accent-qss text-primary-content px-3 flex items-center text-sm font-bold">
                                         #{index + 1}
                                     </span>
                                     <input
@@ -122,7 +122,7 @@
             </div>
             
             <!-- Warning -->
-            <div class="alert alert-warning">
+            <div class="alert bg-secondary-qss text-black">
                 <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.728-.833-2.498 0L4.316 15.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
@@ -139,7 +139,7 @@
                     <ArrowLeft class="w-4 h-4" />
                     กลับแก้ไขข้อมูล
                 </button>
-                <button type="submit" class="btn btn-success btn-lg">
+                <button type="submit" class="btn bg-accent-qss text-white btn-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m-6 4l-2-2m6 4l2-2m-6-4l-2-2" />
                     </svg>
