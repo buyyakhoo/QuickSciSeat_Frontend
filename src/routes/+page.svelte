@@ -56,6 +56,9 @@
             console.log('Fetching time slots from backend...');
             const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL
 
+            console.log('ENV:', import.meta.env.VITE_BACKEND_API_URL);
+            console.log('ALL ENV:', import.meta.env);
+
             const response = await fetch(`${BACKEND_URL}/table_service/timeslots`, {
                 method: 'GET',
                 headers: {
@@ -282,9 +285,6 @@
 
         try {
             const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL
-
-            console.log('ENV:', import.meta.env.VITE_BACKEND_API_URL);
-            console.log('ALL ENV:', import.meta.env);
 
             const timeslotResponse = await fetch(
                 `${BACKEND_URL}/table_service/timeslot/${selectedTimeSlot}/table/${selectedTable.id}`
