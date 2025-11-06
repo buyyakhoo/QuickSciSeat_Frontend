@@ -283,6 +283,9 @@
         try {
             const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL
 
+            console.log('ENV:', import.meta.env.VITE_BACKEND_API_URL);
+            console.log('ALL ENV:', import.meta.env);
+
             const timeslotResponse = await fetch(
                 `${BACKEND_URL}/table_service/timeslot/${selectedTimeSlot}/table/${selectedTable.id}`
             );
