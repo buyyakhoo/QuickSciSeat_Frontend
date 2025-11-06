@@ -24,6 +24,7 @@
     import type { Table, TimeSlot, TableStatus } from '$lib/shared/types';
 
     import { browser } from '$app/environment';
+    import { VITE_BACKEND_API_URL } from '$env/static/private';
     // import { VITE_BACKEND_API_URL } from '$env/static/private';
 
     export let data: { 
@@ -54,10 +55,8 @@
     const fetchTimeSlots = async () => {
         try {
             console.log('Fetching time slots from backend...');
-            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL
 
-            console.log('ENV:', import.meta.env.VITE_BACKEND_API_URL);
-            console.log('ALL ENV:', import.meta.env);
+            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL ?? VITE_BACKEND_API_URL;
 
             const response = await fetch(`${BACKEND_URL}/table_service/timeslots`, {
                 method: 'GET',
@@ -98,7 +97,7 @@
     const fetchTables = async () => {
         try {
             console.log('Fetching tables from backend...');
-            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL
+            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL ?? VITE_BACKEND_API_URL;
 
             const response = await fetch(`${BACKEND_URL}/table_service/tables`, {
                 method: 'GET',
@@ -138,7 +137,7 @@
     const fetchTableStatuses = async () => {
         try {
             console.log('Fetching table statuses from backend...');
-            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL
+            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL ?? VITE_BACKEND_API_URL;
 
             const response = await fetch(`${BACKEND_URL}/table_service/timeslot/all/tables`, {
                 method: 'GET',
@@ -243,7 +242,7 @@
             status: tableSelected?.status,
         }
 
-        const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL;
+        const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL ?? VITE_BACKEND_API_URL;
         const checkReservationResponse = await fetch(`${BACKEND_URL}/reservation_service/check/${session?.user?.student_id}/reservation`, {
             method: 'GET',
             headers: {
@@ -284,7 +283,7 @@
         const studentIds = event.detail.studentIds;
 
         try {
-            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL
+            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL ?? VITE_BACKEND_API_URL;
 
             const timeslotResponse = await fetch(
                 `${BACKEND_URL}/table_service/timeslot/${selectedTimeSlot}/table/${selectedTable.id}`
@@ -360,7 +359,7 @@
     // }
     async function handleCheckIn() {
         try {
-            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL;
+            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL ?? VITE_BACKEND_API_URL;
 
             // 1. ดึงข้อมูล user_id และตรวจสอบ
             const user_id_str = session?.user?.student_id;
@@ -436,7 +435,7 @@
     // }
     async function handleCheckOut() {
         try {
-            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL;
+            const BACKEND_URL = import.meta.env.VITE_BACKEND_API_URL ?? VITE_BACKEND_API_URL;
             
             // 1. ดึงข้อมูล user_id และตรวจสอบ
             const user_id_str = session?.user?.student_id;
