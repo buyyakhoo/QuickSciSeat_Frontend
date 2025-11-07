@@ -272,7 +272,7 @@
         } else if ((tableSelected?.status === 'reserved' || tableSelected?.status === 'occupied') && tableReservedID === table.id && tableReservedTimeSlotCode === selectedTimeSlot) {
             showDetailModal = true;
         } else {
-            alert('คุณได้ทำการจองไว้แล้ว กรุณาเลือกโต๊ะที่คุณจองไว้เท่านั้น');
+            alert('โต๊ะนี้มีคนอื่นจองไว้แล้ว กรุณาเลือกโต๊ะที่คุณจองไว้เท่านั้น หากยังไม่จองให้ทำการจองโต๊ะที่ว่างเท่านั้น');
         }
     }
   
